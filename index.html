@@ -222,8 +222,8 @@ body{font-family:'Lato',sans-serif;background:var(--warm-white);color:var(--dark
     <div class="section-title">Choose a deck</div>
   </div>
   <div class="decks-grid">
-    <div class="deck-card" onclick="selectDeck('noi',this)"><span class="deck-icon">♀️</span><div class="deck-name">Female</div><div class="deck-count">64 cards</div></div>
-    <div class="deck-card disabled" onclick="showSoon()"><span class="deck-icon">♂️</span><div class="deck-name">Male</div><div class="deck-count">coming soon</div></div>
+    <div class="deck-card" onclick="selectDeck('noi',this)"><span class="deck-icon">♀️</span><div class="deck-name">Female</div><div class="deck-count">90 cards</div></div>
+    <div class="deck-card" onclick="selectDeck('ferfi',this)"><span class="deck-icon">♂️</span><div class="deck-name">Male</div><div class="deck-count">90 cards</div></div>
     <div class="deck-card disabled" onclick="showSoon()"><span class="deck-icon">✨</span><div class="deck-name">Resource</div><div class="deck-count">coming soon</div></div>
   </div>
 </div>
@@ -423,7 +423,8 @@ body{font-family:'Lato',sans-serif;background:var(--warm-white);color:var(--dark
 
 <script>
 const BASE_URL='https://raw.githubusercontent.com/anitacsikai/card-coaching/main/';
-const DECK_COUNT=64;
+const DECK_COUNT_NOI=90;
+const DECK_COUNT_FERFI=90;
 
 const SPREADS=[
   {
@@ -515,6 +516,7 @@ const MULTI_PHASES=[
 
 // STATE
 let shuffledDeck=[];
+let currentDeckKey='noi';
 let browseMax=1,browseSelected=new Set();
 let drawMax=1,drawSelected=new Set();
 let customFaceDown=true;
@@ -527,9 +529,24 @@ let multiDeckRemaining=[];
 let multiPhaseSelected=new Set();
 
 function shuffle(arr){return [...arr].rowt(()=>Math.random()-0.5);}
-function getDeckCards(){
+function getExt(deck, i){
+  // Női: 1-12, 14, 16-22, 24-64 = png; 13,15,23,65-90 = jpg
+  if(deck==='noi'){
+    if(i===13||i===15||i===23||i>=65) return '.jpg';
+    return '.png';
+  }
+  // Férfi: mind jpg
+  if(deck==='ferfi') return '.jpg';
+  return '.png';
+}
+
+function getDeckCards(deck){
   const cards=[];
-  for(let i=1;i<=DECK_COUNT;i++) cards.push({file:'noi_'+i+'.png'});
+  if(deck==='ferfi'){
+    for(let i=1;i<=DECK_COUNT_FERFI;i++) cards.push({file:'ferfi_'+i+getExt(deck,i)});
+  } else {
+    for(let i=1;i<=DECK_COUNT_NOI;i++) cards.push({file:'noi_'+i+getExt(deck,i)});
+  }
   return shuffle(cards);
 }
 function goTo(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
@@ -539,11 +556,12 @@ function logoSvg(){return `<svg width="28" height="28" viewBox="0 0 40 40" fill=
 function selectDeck(deck,el){
   document.querySelectorAll('.deck-card').forEach(c=>c.classList.remove('selected'));
   el.classList.add('selected');
+  currentDeckKey=deck;
   setTimeout(()=>goTo('screen-mode'),180);
 }
 
 function selectMode(mode){
-  shuffledDeck=getDeckCards();
+  shuffledDeck=getDeckCards(currentDeckKey);
   if(mode==='browse'){buildBrowseGrid();goTo('screen-browse');}
   else if(mode==='draw'){buildDrawGrid();goTo('screen-draw');}
   else if(mode==='spread'){buildSpreadsGrid();goTo('screen-spread');}
@@ -628,7 +646,7 @@ function buildSpreadsGrid(){
 function startSpread(spread){
   if(spread.multi){startMultiSpread();return;}
   currentSpread=spread;
-  shuffledDeck=getDeckCards();
+  shuffledDeck=getDeckCards(currentDeckKey);
   spreadPickSelected.clear();
   document.getElementById('spreadPickTitle').textContent=spread.name;
   document.getElementById('spreadPickSub').textContent='Choose '+spread.positions.length+' face-down cards';
@@ -673,7 +691,7 @@ function confirmSpreadPick(){
 function startMultiSpread(){
   multiPhaseIdx=0;
   multiResults=[];
-  multiDeckRemaining=getDeckCards();
+  multiDeckRemaining=getDeckCards(currentDeckKey);
   multiPhaseSelected.clear();
   renderMultiPhase();
   goTo('screen-multi');
@@ -799,7 +817,7 @@ function startCustomSpread(){
   const total=rowCounts.reduce((a,b)=>a+b,0);
   // show pick screen or direct
   currentSpread={name:'Custom Spread',positions:Array.from({length:total},(_,i)=>({label:''+(i+1),question:null})),rows:rowCounts.map((c,ri)=>{let s=rowCounts.slice(0,ri).reduce((a,b)=>a+b,0);return Array.from({length:c},(_,j)=>s+j);}),custom:true};
-  shuffledDeck=getDeckCards();
+  shuffledDeck=getDeckCards(currentDeckKey);
   spreadPickSelected.clear();
   document.getElementById('spreadPickTitle').textContent='Custom Spread';
   document.getElementById('spreadPickSub').textContent=customFaceDown?'Choose '+total+' face-down cards':'Choose '+total+' lapot';
