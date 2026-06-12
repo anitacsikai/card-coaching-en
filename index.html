@@ -173,23 +173,23 @@ body{font-family:'Lato',sans-serif;background:var(--warm-white);color:var(--dark
 .result-italic{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:1rem;color:var(--plum);}
 .result-cards-area{display:flex;flex-wrap:nowrap;justify-content:flex-start;gap:16px;padding:1rem 1.5rem 1.5rem;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .spread-result-layout{display:flex;flex-direction:column;gap:24px;width:100%;max-width:900px;margin:0 auto;padding:0 1.2rem 1.5rem;overflow-x:hidden;}
-.spread-row{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;padding-bottom:4px;}
+.spread-row{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;padding-bottom:4px;align-items:flex-start;}
 .result-actions{display:flex;justify-content:center;gap:12px;padding:1rem 1.5rem 3rem;flex-wrap:wrap;}
 
 /* MULTI RESULT */
 .multi-groups-container{display:flex;flex-direction:column;align-items:center;gap:0.5rem;padding:0 1.5rem 2rem;width:100%;}
 .multi-group{margin-bottom:2rem;width:100%;max-width:860px;}
 .multi-group-title{font-family:'Montserrat',sans-serif;font-weight:600;font-size:0.78rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--plum);text-align:center;margin-bottom:1rem;padding:0.5rem 1rem;background:var(--lavender);border-radius:50px;display:inline-block;}
-.multi-group-wrap{display:flex;justify-content:center;flex-wrap:wrap;gap:16px;}
+.multi-group-wrap{display:flex;justify-content:center;flex-wrap:wrap;gap:16px;overflow-x:auto;}
 
 /* CARD BLOCK */
-.card-block{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.card-block{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;}
 .card-pos-label{font-family:'Montserrat',sans-serif;font-size:0.65rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--plum);text-align:center;}
 .card-question{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:0.88rem;color:var(--dark);text-align:center;max-width:160px;line-height:1.5;}
 
 /* FLIP */
 .flip-card-wrapper{perspective:1000px;}
-.flip-card{width:var(--card-w);height:var(--card-h);position:relative;transform-style:preserve-3d;transition:transform 0.55s cubic-bezier(0.4,0,0.2,1);cursor:pointer;}
+.flip-card{width:var(--card-w);height:var(--card-h);min-width:var(--card-w);min-height:var(--card-h);position:relative;transform-style:preserve-3d;transition:transform 0.55s cubic-bezier(0.4,0,0.2,1);cursor:pointer;}
 .flip-card.flipped{transform:rotateY(180deg);}
 .flip-card.no-flip{cursor:default;transform:rotateY(180deg);}
 .flip-face{position:absolute;inset:0;border-radius:var(--radius-lg);backface-visibility:hidden;overflow:hidden;border:1.5px solid;box-shadow:var(--shadow-card);}
@@ -249,6 +249,11 @@ body{font-family:'Lato',sans-serif;background:var(--warm-white);color:var(--dark
 .modal-close{position:sticky;bottom:0;display:block;width:100%;margin-top:1.5rem;padding:0.8rem;font-family:'Montserrat',sans-serif;font-weight:600;font-size:0.78rem;letter-spacing:1px;text-transform:uppercase;background:var(--plum);color:white;border:none;border-radius:var(--radius);cursor:pointer;}
 .modal-close:hover{background:var(--plum-dark);}
 
+/* DESKTOP - spread rows side by side */
+@media(min-width:601px){
+  .spread-row{flex-wrap:nowrap;justify-content:center;}
+  .spread-result-layout{align-items:center;}
+}
 /* MOBILE RESPONSIVE */
 @media(max-width:600px){
   .decks-grid{grid-template-columns:1fr;max-width:340px;}
@@ -297,6 +302,7 @@ body{font-family:'Lato',sans-serif;background:var(--warm-white);color:var(--dark
     <div class="home-tagline">The World Within</div>
     <p class="home-subtitle">Discover what words cannot reach.</p>
     <button class="btn-primary" onclick="goTo('screen-deck')">Begin →</button>
+    <br><br>
     <button class="help-link" onclick="document.getElementById('helpModal').classList.add('show')">How to use this platform?</button>
   </div>
 </div>
@@ -963,7 +969,7 @@ function updateRowBuilder(){
     <div class="deck-pick-btns">
       <button class="deck-pick-btn${selDeck==='noi'?' active':''}" data-deck="noi" onclick="setRowDeck(this,'noi')">♀️</button>
       <button class="deck-pick-btn${selDeck==='ferfi'?' active':''}" data-deck="ferfi" onclick="setRowDeck(this,'ferfi')">♂️</button>
-      <button class="deck-pick-btn${selDeck==='eroforrás'?' active':''}" data-deck="eroforrás" onclick="setRowDeck(this,'✨')">✨</button>
+      <button class="deck-pick-btn${selDeck==='eroforrás'?' active':''}" data-deck="eroforrás" onclick="setRowDeck(this,'eroforrás')">✨</button>
     </div>`;
     container.appendChild(row);
   }
@@ -973,6 +979,12 @@ function setRowDeck(btn,deck){
   row.querySelectorAll('.deck-pick-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   btn.dataset.deck=deck;
+  // Update all siblings data-deck to their original values
+  const btns=row.querySelectorAll('.deck-pick-btn');
+  if(btns[0]) btns[0].dataset.deck='noi';
+  if(btns[1]) btns[1].dataset.deck='ferfi';
+  if(btns[2]) btns[2].dataset.deck='eroforrás';
+  btn.classList.add('active');
 }
 // Store custom spread config globally
 let customRowData=[];
@@ -1210,6 +1222,13 @@ updateRowBuilder();
 <h3>Important Information</h3>
 <p>Digital Coaching Cards is a tool designed to support self-reflection and personal development. The cards do not provide diagnoses and are not a substitute for psychological, psychiatric, or medical services.</p>
 
+    
+<h3>Install on Your Device</h3>
+<p>You can install Digital Coaching Cards on your phone, tablet, or laptop in just a few taps.</p>
+<p><strong>Android (Chrome):</strong> tap "Add to Home Screen" in the browser menu.</p>
+<p><strong>Desktop Chrome:</strong> click the install <strong>⊕</strong> icon on the right side of the address bar.</p>
+<p><strong>iPhone (Safari):</strong> tap Share → "Add to Home Screen".</p>
+<p>After installation, you can launch it with a single tap, just like a regular app.</p>
     <button class="modal-close" onclick="document.getElementById('helpModal').classList.remove('show')">Close</button>
   </div>
 </div>
